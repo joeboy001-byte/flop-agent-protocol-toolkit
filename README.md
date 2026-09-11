@@ -2,9 +2,8 @@
 
 An independent open-source toolkit for analyzing FLOP inference requests and structuring protocol reviews.
 
-The project combines practical request analysis with a structured review workflow for developers and contributors exploring FLOP-style compute and protocol concepts.
-
-## What it does
+The project combines practical request analysis with a structured review workflow for developers and contributors exploring FLOP-style compute and protocol concept
+## What It Does
 
 The toolkit currently provides three commands.
 
@@ -55,7 +54,7 @@ It provides:
 - Risk assessment
 - Recommended next actions
 
-## Project structure
+## Project Structure
 
 - `compute_analyzer.py` — standalone compute request analyzer
 - `review_analyzer.py` — standalone protocol review analyzer
@@ -108,7 +107,7 @@ For confidential execution, add:
 
 `--confidential`
 
-## How the toolkit can be used
+## How the Toolkit Can Be Used
 
 A typical workflow is:
 
@@ -116,7 +115,7 @@ Inference request → Compute Analyzer → Session Planner → Miner / execution
 
 The toolkit is designed as a lightweight analysis and contribution aid rather than a replacement for production infrastructure, benchmarking systems, or formal protocol verification.
 
-## Design goals
+## Design Goals
 
 - Keep analysis transparent and understandable.
 - Use explicit inputs rather than hidden assumptions.
@@ -140,7 +139,7 @@ The compute and session outputs are heuristic decision aids.
 
 The protocol review output is a review aid and should not be treated as an official audit, formal proof, or security verdict.
 
-## Contribution
+## Contributing
 
 Contributions, suggestions, test cases, and improvements are welcome.
 
