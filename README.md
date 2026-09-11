@@ -1,334 +1,158 @@
-\# FLOP Agent \& Protocol Toolkit
+# FLOP Agent & Protocol Toolkit
 
+An independent open-source toolkit for analyzing FLOP inference requests and structuring protocol reviews.
 
+The project combines practical request analysis with a structured review workflow for developers and contributors exploring FLOP-style compute and protocol concepts.
 
-An independent, open-source developer toolkit for exploring two parts of the
+## What it does
 
-FLOP agent economy:
+The toolkit currently provides three commands:
 
+### 1. Compute Analyzer
 
+Analyzes an inference request using:
 
-1\. \*\*Compute Request Analyzer\*\*
+- Model hash
+- Required FLOPs
+- Maximum latency
+- FLOP fee
+- Confidential execution requirement
 
-2\. \*\*Yellow Paper Review Analyzer\*\*
+It produces a simple assessment of:
 
+- Compute scale
+- Latency sensitivity
+- Fee per billion FLOPs
+- Request profile
+- Risk level
+- Execution recommendation
 
+### 2. Protocol Review Analyzer
 
-The toolkit is designed as a practical review and development aid. It does
+Helps structure reviews of protocol requirements.
 
-not submit transactions, select miners, perform formal proofs, or provide
+It records:
 
-official FLOP security/audit conclusions.
+- Protocol section
+- Requirement
+- Evidence type
+- Implementation status
+- Assumptions
+- Review question
 
+The output is intended to help contributors identify areas that require stronger evidence, testing, or implementation work.
 
+### 3. Session Planner
 
-\## What the toolkit does
+Combines request-level compute analysis into a higher-level session planning workflow.
 
+It provides:
 
+- Request classification
+- Compute and latency assessment
+- Fee efficiency
+- Confidentiality handling
+- Risk assessment
+- Recommended next actions
 
-\### 1. Compute Request Analyzer
-
-
-
-FLOP session requests describe parameters such as:
-
-
-
-\- model-weight hash
-
-\- maximum latency
-
-\- compute required in FLOPs
-
-\- confidentiality requirement
-
-\- FLOP fee
-
-
-
-The Compute Request Analyzer turns those parameters into a structured report
-
-covering:
-
-
-
-\- compute scale
-
-\- latency sensitivity
-
-\- fee per billion FLOPs
-
-\- fee-efficiency indicator
-
-\- request-risk indicator
-
-\- developer notes
-
-
-
-The classifications are heuristic indicators. They are not a live FLOP market
-
-price and do not guarantee that a miner will accept a request.
-
-
-
-\### 2. Yellow Paper Review Analyzer
-
-
-
-The Yellow Paper Review Analyzer helps organize a protocol review item around:
-
-
-
-\- section or review area
-
-\- requirement or claim
-
-\- evidence type
-
-\- implementation status
-
-\- key assumption
-
-\- reviewer question
-
-
-
-The tool distinguishes four evidence categories:
-
-
-
-\- `artifact`
-
-\- `conditional`
-
-\- `empirical`
-
-\- `unavailable`
-
-
-
-It also distinguishes implementation states:
-
-
-
-\- `implemented`
-
-\- `partial`
-
-\- `designed-not-wired`
-
-
-
-The resulting risk and priority values are reviewer-oriented indicators, not
-
-formal security verdicts.
-
-
-
-\## Why this exists
-
-
-
-The FLOP Yellow Paper is a research draft published for open technical review.
-
-The project explicitly identifies several areas where deeper review is useful,
-
-including effective-FLOP metering, verification, miner and validator economics,
-
-session/dispute mechanisms, and data availability.
-
-
-
-This toolkit is intended to make that kind of review easier to structure and
-
-reproduce.
-
-
-
-\## Requirements
-
-
-
-\- Python 3.10+
-
-\- No third-party packages required by the toolkit itself
-
-
-
-\## Quick start
-
-
-
-Clone the repository:
-
-
+## Project structure
 
 ```text
-
-git clone https://github.com/joeboy001-byte/flop-agent-protocol-toolkit.git
-
-
-
-Enter the project:
-
-
-
-cd flop-agent-protocol-toolkit
-
-Analyze a compute request
-
-python flop\_toolkit.py compute --model-hash "example-model-abc123" --latency 2 --flops 12500000000000 --fee 0.08
-
-
-
-For a confidential request, add:
-
-
-
-\--confidential
-
-
-
-Example:
-
-
-
-python flop\_toolkit.py compute --model-hash "example-model-abc123" --latency 2 --flops 12500000000000 --fee 0.08 --confidential
-
-Review a Yellow Paper item
-
-python flop\_toolkit.py review --section "Effective-FLOP metering" --requirement "The protocol should correctly meter useful inference work." --evidence "conditional" --implementation "partial" --assumption "The stated metering assumptions hold under the target workload." --question "What tests demonstrate that the metering mechanism remains accurate under different workloads and hardware?"
-
-Example compute output
-
-FLOP COMPUTE REQUEST ANALYZER
-
-
-
-REQUEST
-
-\----------------------------------------------------------------
-
-Model-weight hash: example-model-abc123
-
-Maximum latency:   2 seconds
-
-Compute required:  12,500,000,000,000 FLOPs
-
-Confidentiality:   Not required
-
-FLOP fee:          0.08 FLOP
-
-
-
-ANALYSIS
-
-\----------------------------------------------------------------
-
-Compute scale:             High
-
-Latency sensitivity:       High
-
-Fee per billion FLOPs:     0.00000640 FLOP
-
-Fee efficiency indicator:  Lower fee per billion FLOPs
-
-Request risk indicator:    Medium
-
-Example review output
-
-FLOP YELLOW PAPER REVIEW ANALYZER
-
-
-
-REVIEW ITEM
-
-\----------------------------------------------------------------
-
-Section:                 Effective-FLOP metering
-
-Evidence type:           conditional
-
-Implementation status:   partial
-
-
-
-REVIEW PRIORITY
-
-\----------------------------------------------------------------
-
-Risk indicator:          Medium
-
-Priority:                Focused review
-
-Project structure
-
 flop-agent-protocol-toolkit/
+├── compute_analyzer.py
+├── review_analyzer.py
+├── session_planner.py
+├── flop_toolkit.py
+├── architecture.png
+├── contribution-proof.json
+├── README.md
+├── LICENSE
+└── .gitignore
+Requirements
+Python 3
+No external Python packages are required for the toolkit itself.
+Usage
 
-│
+The recommended entry point is flop_toolkit.py.
 
-├── flop\_toolkit.py
+View available commands
+python flop_toolkit.py --help
+Compute analysis
+python flop_toolkit.py compute --model-hash example-model-abc123 --latency 2 --flops 12500000000000 --fee 0.08
 
-├── compute\_analyzer.py
+For confidential execution:
 
-├── review\_analyzer.py
+python flop_toolkit.py compute --model-hash example-model-abc123 --latency 2 --flops 12500000000000 --fee 0.08 --confidential
+Protocol review
+python flop_toolkit.py review --section "Effective-FLOP metering" --requirement "The protocol should correctly meter useful inference work." --evidence conditional --implementation partial --assumption "stated metering assumptions hold under target workload" --question "What tests demonstrate metering accuracy under different workloads and hardware?"
+Session planning
+python flop_toolkit.py session --model-hash example-model-abc123 --latency 2 --flops 12500000000000 --fee 0.08
 
-└── README.md
+For confidential execution:
 
-Security
+python flop_toolkit.py session --model-hash example-model-abc123 --latency 2 --flops 12500000000000 --fee 0.08 --confidential
+How the toolkit can be used
 
+A typical workflow is:
 
+Inference request
+       |
+       v
+Compute Analyzer
+       |
+       v
+Session Planner
+       |
+       v
+Miner / execution considerations
+       |
+       v
+Protocol Review
 
-The toolkit does not require a private key, wallet seed, password, or
+The toolkit is designed as a lightweight analysis and contribution aid rather than a replacement for production infrastructure, benchmarking systems, or formal protocol verification.
 
-Technocore identity.pem.
+Design goals
+Keep analysis transparent and understandable.
+Use explicit inputs rather than hidden assumptions.
+Separate heuristic analysis from verified facts.
+Help contributors structure protocol questions.
+Provide useful tooling that can be extended as FLOP-related infrastructure develops.
+Limitations
 
+This project does not provide:
 
+Live miner capacity measurements
+Live market clearing
+Guaranteed request acceptance
+Production inference execution
+Formal protocol verification
+Security auditing
+Official FLOP network data
 
-Never add private keys, seed phrases, passphrases, or other secrets to this
+The compute and session outputs are heuristic decision aids.
 
-repository.
+The protocol review output is a review aid and should not be treated as an official audit, formal proof, or security verdict.
 
+Contribution
 
+Contributions, suggestions, test cases, and improvements are welcome.
 
-Important scope
+Useful contributions include:
 
+Better analysis heuristics
+Additional validation
+Representative workload benchmarks
+Protocol review templates
+Documentation improvements
+New analysis modules
+Status
 
+The toolkit is an independent open-source project under active development.
 
-This is an independent community/developer project.
+Current modules:
 
+Compute Analyzer
+Protocol Review Analyzer
+Session Planner
 
-
-It is not an official FLOP Network, Flop Labs, or Technocore product, audit,
-
-security review, or protocol implementation.
-
-
-
-The toolkit's classifications and indicators should be treated as analysis
-
-aids and not as guarantees about protocol behavior.
-
-
-
-Source basis
-
-
-
-The review-oriented terminology is informed by the publicly published
-
-FLOP Yellow Paper research draft, including its distinctions between
-
-artifact, conditional proof/model result, empirical evidence, and unavailable
-
-evidence.
-
-
-
-License
-
-
-
-Apache-2.0
-
+Future development may add additional analysis and benchmarking capabilities as the project evolves.
