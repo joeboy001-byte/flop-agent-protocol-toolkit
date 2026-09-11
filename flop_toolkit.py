@@ -1,180 +1,234 @@
-#!/usr/bin/env python3
-
-"""
-FLOP Agent & Protocol Toolkit
-
-A single command-line entry point for:
-
-1. Compute Request Analysis
-2. Yellow Paper Review Analysis
-
-This is an independent developer/research tool.
-It does not submit FLOP transactions, choose miners,
-perform formal proofs, or provide security verdicts.
-"""
-
 import argparse
-import sys
-
-from compute_analyzer import ComputeRequest, analyze_request, print_report
-from review_analyzer import ReviewItem, analyze, print_report as print_review_report
 
 
-def build_parser():
+def classify_compute(flops):
+    if flops < 1_000_000_000_000:
+        return "Low"
+    elif flops < 10_000_000_000_000:
+        return "Medium"
+    elif flops < 100_000_000_000_000:
+        return "High"
+    return "Very High"
+
+
+def classify_latency(latency):
+    if latency <= 2:
+        return "High"
+    elif latency <= 10:
+        return "Medium"
+    return "Low"
+
+
+def fee_per_billion_flops(flops, fee):
+    return fee / (flops / 1_000_000_000)
+
+
+def analyze_compute(flops, fee, latency, confidential):
+    compute_scale = classify_compute(flops)
+    latency_sensitivity = classify_latency(latency)
+    fee_efficiency = fee_per_billion_flops(flops, fee)
+
+    if compute_scale in ("High", "Very High") and latency_sensitivity == "High":
+        profile = "Demanding request"
+        risk = "High"
+    elif compute_scale in ("High", "Very High") or latency_sensitivity == "High":
+        profile = "Resource-sensitive request"
+        risk = "Medium"
+    else:
+        profile = "Moderate request"
+        risk = "Low"
+
+    if confidential:
+        execution = (
+            "Confidential execution requested; "
+            "the selected miner must support the required confidential tier."
+        )
+    else:
+        execution = "Standard execution is suitable based on the request flags."
+
+    return {
+        "compute_scale": compute_scale,
+        "latency_sensitivity": latency_sensitivity,
+        "fee_efficiency": fee_efficiency,
+        "profile": profile,
+        "risk": risk,
+        "execution": execution,
+    }
+
+
+def run_compute(args):
+    result = analyze_compute(
+        args.flops,
+        args.fee,
+        args.latency,
+        args.confidential,
+    )
+
+    print("\n=== FLOP Agent & Protocol Toolkit: Compute ===")
+    print(f"Model hash: {args.model_hash}")
+    print(f"Compute scale: {result['compute_scale']}")
+    print(f"Latency sensitivity: {result['latency_sensitivity']}")
+    print(f"FLOPs: {args.flops:,.0f}")
+    print(f"Fee: {args.fee:.6f} FLOP")
+    print(
+        f"Fee per billion FLOPs: "
+        f"{result['fee_efficiency']:.8f} FLOP"
+    )
+    print(
+        f"Confidentiality: "
+        f"{'Required' if args.confidential else 'Not required'}"
+    )
+    print(f"Request profile: {result['profile']}")
+    print(f"Risk level: {result['risk']}")
+    print(f"Execution recommendation: {result['execution']}")
+
+    print("\nNote:")
+    print(
+        "This analysis is heuristic. It does not measure live miner "
+        "capacity, live market clearing, or guarantee request acceptance."
+    )
+
+
+def run_review(args):
+    print("\n=== FLOP Agent & Protocol Toolkit: Protocol Review ===")
+    print(f"Section: {args.section}")
+    print(f"Requirement: {args.requirement}")
+    print(f"Evidence type: {args.evidence}")
+    print(f"Implementation status: {args.implementation}")
+
+    if args.assumption:
+        print(f"Assumption: {args.assumption}")
+
+    print(f"Review question: {args.question}")
+
+    if args.evidence == "artifact":
+        risk = "Lower evidence uncertainty"
+    elif args.evidence == "conditional":
+        risk = "Medium evidence uncertainty"
+    elif args.evidence == "empirical":
+        risk = "Evidence requires validation against the target workload"
+    else:
+        risk = "High evidence uncertainty"
+
+    print(f"Review assessment: {risk}")
+
+    print("\nNote:")
+    print(
+        "This is a review aid, not an official audit, formal proof, "
+        "or security verdict."
+    )
+
+
+def run_session(args):
+    result = analyze_compute(
+        args.flops,
+        args.fee,
+        args.latency,
+        args.confidential,
+    )
+
+    print("\n=== FLOP Agent & Protocol Toolkit: Session Planner ===")
+    print(f"Model hash: {args.model_hash}")
+    print(f"Compute scale: {result['compute_scale']}")
+    print(f"Latency sensitivity: {result['latency_sensitivity']}")
+    print(f"FLOPs: {args.flops:,.0f}")
+    print(f"Fee: {args.fee:.6f} FLOP")
+    print(
+        f"Fee per billion FLOPs: "
+        f"{result['fee_efficiency']:.8f} FLOP"
+    )
+    print(
+        f"Confidentiality: "
+        f"{'Required' if args.confidential else 'Not required'}"
+    )
+    print(f"Request profile: {result['profile']}")
+    print(f"Risk level: {result['risk']}")
+    print(f"Execution recommendation: {result['execution']}")
+
+    print("\nPlanner actions:")
+    print("1. Verify the model hash before submission.")
+    print("2. Benchmark a representative workload.")
+    print("3. Compare the request against miner capabilities.")
+    print("4. Confirm that the latency target is realistic.")
+
+    if args.confidential:
+        print(
+            "5. Confirm confidential execution support before "
+            "sending the request."
+        )
+
+    print("\nNote:")
+    print(
+        "The planner is a heuristic decision aid. It does not measure "
+        "live miner capacity, live market clearing, or guarantee "
+        "request acceptance."
+    )
+
+
+def main():
     parser = argparse.ArgumentParser(
         description="FLOP Agent & Protocol Toolkit"
     )
 
     subparsers = parser.add_subparsers(
         dest="command",
-        required=True
+        required=True,
     )
 
     compute = subparsers.add_parser(
         "compute",
-        help="Analyze a FLOP inference session request"
+        help="Analyze a FLOP inference request.",
     )
-
-    compute.add_argument(
-        "--model-hash",
-        required=True,
-        help="Model-weight hash"
-    )
-
-    compute.add_argument(
-        "--latency",
-        required=True,
-        type=float,
-        help="Maximum latency in seconds"
-    )
-
-    compute.add_argument(
-        "--flops",
-        required=True,
-        type=float,
-        help="Compute required in FLOPs"
-    )
-
-    compute.add_argument(
-        "--fee",
-        required=True,
-        type=float,
-        help="Session fee in FLOP"
-    )
-
-    compute.add_argument(
-        "--confidential",
-        action="store_true",
-        help="Request confidential execution"
-    )
+    compute.add_argument("--model-hash", required=True)
+    compute.add_argument("--latency", type=float, required=True)
+    compute.add_argument("--flops", type=float, required=True)
+    compute.add_argument("--fee", type=float, required=True)
+    compute.add_argument("--confidential", action="store_true")
+    compute.set_defaults(func=run_compute)
 
     review = subparsers.add_parser(
         "review",
-        help="Analyze a FLOP Yellow Paper review item"
+        help="Review a protocol requirement.",
     )
-
-    review.add_argument(
-        "--section",
-        required=True,
-        help="Yellow Paper section or review area"
-    )
-
-    review.add_argument(
-        "--requirement",
-        required=True,
-        help="Requirement or claim being reviewed"
-    )
-
+    review.add_argument("--section", required=True)
+    review.add_argument("--requirement", required=True)
     review.add_argument(
         "--evidence",
-        required=True,
         choices=[
             "artifact",
             "conditional",
             "empirical",
             "unavailable",
         ],
-        help="Evidence category"
+        required=True,
     )
-
     review.add_argument(
         "--implementation",
-        required=True,
         choices=[
             "implemented",
             "partial",
             "designed-not-wired",
         ],
-        help="Implementation status"
-    )
-
-    review.add_argument(
-        "--assumption",
-        default="",
-        help="Key assumption behind the claim"
-    )
-
-    review.add_argument(
-        "--question",
         required=True,
-        help="Question a reviewer should investigate"
     )
+    review.add_argument("--assumption")
+    review.add_argument("--question", required=True)
+    review.set_defaults(func=run_review)
 
-    return parser
-
-
-def run_compute(args):
-    request = ComputeRequest(
-        model_hash=args.model_hash,
-        latency_seconds=args.latency,
-        flops=args.flops,
-        confidential=args.confidential,
-        fee_flop=args.fee,
+    session = subparsers.add_parser(
+        "session",
+        help="Plan a FLOP inference session.",
     )
+    session.add_argument("--model-hash", required=True)
+    session.add_argument("--latency", type=float, required=True)
+    session.add_argument("--flops", type=float, required=True)
+    session.add_argument("--fee", type=float, required=True)
+    session.add_argument("--confidential", action="store_true")
+    session.set_defaults(func=run_session)
 
-    analysis = analyze_request(request)
-    print_report(request, analysis)
-
-
-def run_review(args):
-    item = ReviewItem(
-        section=args.section,
-        requirement=args.requirement,
-        evidence_type=args.evidence,
-        implementation_status=args.implementation,
-        assumption=args.assumption,
-        reviewer_question=args.question,
-    )
-
-    assessment = analyze(item)
-    print_review_report(item, assessment)
-
-
-def main():
-    parser = build_parser()
     args = parser.parse_args()
-
-    try:
-        if args.command == "compute":
-            run_compute(args)
-
-        elif args.command == "review":
-            run_review(args)
-
-        else:
-            parser.print_help()
-            return 1
-
-    except ValueError as exc:
-        print(f"Input error: {exc}", file=sys.stderr)
-        return 2
-
-    except Exception as exc:
-        print(f"Unexpected error: {exc}", file=sys.stderr)
-        return 3
-
-    return 0
+    args.func(args)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()
